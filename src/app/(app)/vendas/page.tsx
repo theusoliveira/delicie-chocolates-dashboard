@@ -52,7 +52,7 @@ export default async function VendasPage({ searchParams }: Props) {
             description="Clique em 'Nova Venda' para registrar sua primeira venda deste período."
           />
         ) : (
-          <TabelaVendas vendas={vendas} />
+          <TabelaVendas vendas={vendas} produtos={produtos} />
         )}
       </div>
     </div>

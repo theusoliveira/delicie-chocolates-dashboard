@@ -1,5 +1,6 @@
 export type Canal = 'loja' | 'delivery' | 'encomenda' | 'outro'
 export type TipoGasto = 'fixo' | 'variavel'
+export type StatusVenda = 'pendente' | 'pago'
 
 export interface Produto {
   id: string
@@ -27,6 +28,7 @@ export interface Venda {
   data: string
   data_entrega: string | null
   canal: Canal
+  status: StatusVenda   // ← NOVO
   observacoes: string | null
   created_at: string
   produto?: Produto

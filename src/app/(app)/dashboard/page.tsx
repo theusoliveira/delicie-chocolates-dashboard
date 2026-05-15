@@ -17,12 +17,14 @@ export default async function DashboardPage() {
     getGastos(mes),
   ])
 
-  const totalVendas = vendas.reduce((s, v) => s + v.valor_total, 0)
+  const vendasPagas = vendas.filter((v) => v.status === 'pago')
+
+  const totalVendas = vendasPagas.reduce((s, v) => s + v.valor_total, 0)
   const totalGastos = gastos.reduce((s, g) => s + g.valor, 0)
   const lucro = totalVendas - totalGastos
-  const ticketMedio = vendas.length > 0 ? totalVendas / vendas.length : 0
+  const ticketMedio = vendasPagas.length > 0 ? totalVendas / vendasPagas.length : 0
 
-  const ultimasVendas = vendas.slice(0, 5)
+  const ultimasVendas = vendasPagas.slice(0, 5)
   const ultimosGastos = gastos.slice(0, 5)
 
   const mesNome = new Date().toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' })
@@ -39,7 +41,7 @@ export default async function DashboardPage() {
         <StatCard
           title="Total de Vendas"
           value={formatCurrency(totalVendas)}
-          subtitle={`${vendas.length} ${pluralize(vendas.length, 'venda')} no mês`}
+          subtitle={`${vendasPagas.length} pagas · ${vendas.length - vendasPagas.length} pendentes`}
           icon={TrendingUp}
           variant="success"
         />
@@ -60,7 +62,7 @@ export default async function DashboardPage() {
         <StatCard
           title="Ticket Médio"
           value={ticketMedio > 0 ? formatCurrency(ticketMedio) : 'R$ 0,00'}
-          subtitle="por venda"
+          subtitle="por venda paga"
           icon={BarChart3}
         />
       </div>
@@ -70,7 +72,7 @@ export default async function DashboardPage() {
         <h2 className="text-base font-semibold text-chocolate-900 mb-4">
           Vendas × Gastos (mês atual)
         </h2>
-        <GraficoDashboard vendas={vendas} gastos={gastos} />
+        <GraficoDashboard vendas={vendasPagas} gastos={gastos} />
       </div>
 
       {/* Recent Transactions */}
