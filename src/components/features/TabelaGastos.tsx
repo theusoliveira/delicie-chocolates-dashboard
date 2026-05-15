@@ -9,20 +9,18 @@ import type { CategoriaGasto, Gasto } from '@/types'
 
 interface Props {
   gastos: Gasto[]
-  categorias: CategoriaGasto[]   // ← NOVO
+  categorias: CategoriaGasto[]
 }
 
 export function TabelaGastos({ gastos, categorias }: Props) {
   return (
     <>
-      {/* Mobile: cards */}
       <div className="md:hidden divide-y divide-chocolate-50">
         {gastos.map((g) => (
-          <GastoCard key={g.id} gasto={g} />
+          <GastoCard key={g.id} gasto={g} categorias={categorias} />
         ))}
       </div>
 
-      {/* Desktop: tabela */}
       <div className="hidden md:block overflow-x-auto">
         <table className="w-full text-sm">
           <thead>
@@ -37,7 +35,7 @@ export function TabelaGastos({ gastos, categorias }: Props) {
           </thead>
           <tbody className="divide-y divide-chocolate-50">
             {gastos.map((g) => (
-              <GastoRow key={g.id} gasto={g} />
+              <GastoRow key={g.id} gasto={g} categorias={categorias} />
             ))}
           </tbody>
         </table>
@@ -68,53 +66,49 @@ function TipoBadge({ tipo }: { tipo: Gasto['tipo'] }) {
 }
 
 function GastoCard({ gasto, categorias }: { gasto: Gasto; categorias: CategoriaGasto[] }) {
-  const handleDelete = useCallback(() => deleteGasto(g.id), [g.id])
+  const handleDelete = useCallback(() => deleteGasto(gasto.id), [gasto.id])
   return (
     <div className="p-4 space-y-2">
       <div className="flex items-start justify-between gap-2">
-        <p className="font-semibold text-chocolate-900 truncate">{g.descricao}</p>
-        <span className="font-bold text-red-500 whitespace-nowrap">{formatCurrency(g.valor)}</span>
+        <p className="font-semibold text-chocolate-900 truncate">{gasto.descricao}</p>
+        <span className="font-bold text-red-500 whitespace-nowrap">{formatCurrency(gasto.valor)}</span>
       </div>
       <div className="flex flex-wrap gap-x-3 gap-y-1 text-xs text-chocolate-500 items-center">
-        <span>🗓 {formatDate(g.data)}</span>
-        {g.categoria && <CategoriaBadge categoria={g.categoria} />}
-        <TipoBadge tipo={g.tipo} />
+        <span>🗓 {formatDate(gasto.data)}</span>
+        {gasto.categoria && <CategoriaBadge categoria={gasto.categoria} />}
+        <TipoBadge tipo={gasto.tipo} />
       </div>
-      {g.observacoes && <p className="text-xs text-chocolate-400 italic">{g.observacoes}</p>}
-      <div className="pt-1">
-        <div className="flex items-center justify-between pt-1">
-        <div className="flex items-center gap-1">
-          <NovoGastoModal categorias={categorias} gasto={g} />
-          <DeleteButton onDelete={handleDelete} />
-        </div>
-      </div>
+      {gasto.observacoes && <p className="text-xs text-chocolate-400 italic">{gasto.observacoes}</p>}
+      <div className="flex items-center gap-1 pt-1">
+        <NovoGastoModal categorias={categorias} gasto={gasto} />
+        <DeleteButton onDelete={handleDelete} />
       </div>
     </div>
   )
 }
 
 function GastoRow({ gasto, categorias }: { gasto: Gasto; categorias: CategoriaGasto[] }) {
-  const handleDelete = useCallback(() => deleteGasto(g.id), [g.id])
+  const handleDelete = useCallback(() => deleteGasto(gasto.id), [gasto.id])
   return (
     <tr className="hover:bg-chocolate-50/50 transition-colors">
-      <td className="px-5 py-3 text-chocolate-500 whitespace-nowrap">{formatDate(g.data)}</td>
+      <td className="px-5 py-3 text-chocolate-500 whitespace-nowrap">{formatDate(gasto.data)}</td>
       <td className="px-5 py-3">
-        <p className="font-medium text-chocolate-900">{g.descricao}</p>
-        {g.observacoes && <p className="text-xs text-chocolate-400 italic">{g.observacoes}</p>}
+        <p className="font-medium text-chocolate-900">{gasto.descricao}</p>
+        {gasto.observacoes && <p className="text-xs text-chocolate-400 italic">{gasto.observacoes}</p>}
       </td>
       <td className="px-5 py-3">
-        {g.categoria
-          ? <CategoriaBadge categoria={g.categoria} />
+        {gasto.categoria
+          ? <CategoriaBadge categoria={gasto.categoria} />
           : <span className="text-chocolate-300 text-xs">—</span>}
       </td>
-      <td className="px-5 py-3"><TipoBadge tipo={g.tipo} /></td>
-      <td className="px-5 py-3 text-right font-semibold text-red-500">{formatCurrency(g.valor)}</td>
+      <td className="px-5 py-3"><TipoBadge tipo={gasto.tipo} /></td>
+      <td className="px-5 py-3 text-right font-semibold text-red-500">{formatCurrency(gasto.valor)}</td>
       <td className="px-5 py-3 text-right">
-      <div className="flex items-center justify-end gap-1">
-        <NovoGastoModal categorias={categorias} gasto={g} />
-        <DeleteButton onDelete={handleDelete} />
-      </div>
-    </td>
+        <div className="flex items-center justify-end gap-1">
+          <NovoGastoModal categorias={categorias} gasto={gasto} />
+          <DeleteButton onDelete={handleDelete} />
+        </div>
+      </td>
     </tr>
   )
 }
