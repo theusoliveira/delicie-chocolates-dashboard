@@ -8,8 +8,8 @@ export function NavigationProgress() {
   const searchParams = useSearchParams()
   const [loading, setLoading] = useState(false)
   const [width, setWidth] = useState(0)
-  const timerRef = useRef<ReturnType<typeof setTimeout>>()
-  const intervalRef = useRef<ReturnType<typeof setInterval>>()
+  const timerRef = useRef<ReturnType<typeof setTimeout>>(undefined)
+  const intervalRef = useRef<ReturnType<typeof setInterval>>(undefined)
 
   useEffect(() => {
     // Quando rota muda, para o loading
