@@ -2,9 +2,10 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { LayoutDashboard, ShoppingBag, Receipt, Package, ChevronRight } from 'lucide-react'
+import { LayoutDashboard, ShoppingBag, Receipt, Package, ChevronRight, Loader2 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { LogoutButton } from './LogoutButton'
+import { useState, useEffect } from 'react'
 
 const navItems = [
   { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
@@ -15,6 +16,12 @@ const navItems = [
 
 export function Sidebar() {
   const pathname = usePathname()
+  const [loadingHref, setLoadingHref] = useState<string | null>(null)
+
+  // Quando a rota muda, para o loading
+  useEffect(() => {
+    setLoadingHref(null)
+  }, [pathname])
 
   return (
     <aside
@@ -34,17 +41,23 @@ export function Sidebar() {
       <nav className="flex-1 p-4 space-y-1" aria-label="Menu principal">
         {navItems.map(({ href, label, icon: Icon }) => {
           const active = pathname.startsWith(href)
+          const isLoading = loadingHref === href
+
           return (
             <Link
               key={href}
               href={href}
               aria-current={active ? 'page' : undefined}
+              onClick={() => { if (!active) setLoadingHref(href) }}
               className={cn(
                 'flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-all duration-150',
                 active ? 'bg-chocolate-700 text-white' : 'text-chocolate-300 hover:bg-chocolate-800 hover:text-white'
               )}
             >
-              <Icon size={18} aria-hidden="true" />
+              {isLoading
+                ? <Loader2 size={18} className="animate-spin" aria-hidden="true" />
+                : <Icon size={18} aria-hidden="true" />
+              }
               <span className="flex-1">{label}</span>
               {active && <ChevronRight size={14} className="opacity-60" aria-hidden="true" />}
             </Link>
