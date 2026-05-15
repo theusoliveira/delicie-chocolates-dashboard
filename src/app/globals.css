@@ -1,0 +1,38 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+body {
+  background-color: #fdf8f3;
+  color: #1a0f00;
+}
+
+@layer components {
+  .btn-primary {
+    @apply bg-chocolate-700 hover:bg-chocolate-800 active:bg-chocolate-900 text-white font-medium px-4 py-2 rounded-lg transition-colors duration-150 flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer;
+  }
+
+  .btn-secondary {
+    @apply bg-white hover:bg-chocolate-50 active:bg-chocolate-100 text-chocolate-700 border border-chocolate-200 font-medium px-4 py-2 rounded-lg transition-colors duration-150 flex items-center gap-2 cursor-pointer;
+  }
+
+  .btn-danger {
+    @apply bg-red-50 hover:bg-red-100 active:bg-red-200 text-red-600 border border-red-200 font-medium px-3 py-1.5 rounded-lg transition-colors duration-150 text-sm cursor-pointer;
+  }
+
+  .card {
+    @apply bg-white rounded-xl border border-chocolate-100 shadow-sm;
+  }
+
+  .input {
+    @apply w-full border border-chocolate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-chocolate-400 focus:border-transparent bg-white transition-shadow duration-150;
+  }
+
+  .label {
+    @apply block text-sm font-medium text-chocolate-800 mb-1;
+  }
+
+  .safe-area-bottom {
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+}
