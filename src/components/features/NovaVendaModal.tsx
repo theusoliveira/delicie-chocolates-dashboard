@@ -1,23 +1,34 @@
 'use client'
 
-import { useState, useRef, useCallback } from 'react'
-import { Plus } from 'lucide-react'
+import { useState, useRef, useCallback, useEffect } from 'react'
+import { Plus, Pencil } from 'lucide-react'
 import { Modal } from '@/components/ui/Modal'
-import { createVenda } from '@/actions/vendas'
+import { createVenda, updateVenda } from '@/actions/vendas'
 import { todayISO, formatCurrency } from '@/lib/utils'
-import type { Produto } from '@/types'
+import type { Produto, Venda } from '@/types'
 
 interface Props {
   produtos: Produto[]
+  venda?: Venda        // se passado, abre em modo edição
+  trigger?: 'button'   // reservado para uso externo
 }
 
-export function NovaVendaModal({ produtos }: Props) {
+export function NovaVendaModal({ produtos, venda }: Props) {
+  const isEditing = !!venda
   const [open, setOpen] = useState(false)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string>()
-  const [quantidade, setQuantidade] = useState(1)
+  const [quantidade, setQuantidade] = useState(venda?.quantidade ?? 1)
   const [precoUnit, setPrecoUnit] = useState(0)
   const formRef = useRef<HTMLFormElement>(null)
+
+  // Ao abrir em modo edição, calcula o preço unitário a partir do total existente
+  useEffect(() => {
+    if (open && venda) {
+      setQuantidade(venda.quantidade)
+      setPrecoUnit(venda.valor_total / venda.quantidade)
+    }
+  }, [open, venda])
 
   const valorTotal = precoUnit * quantidade
 
@@ -28,11 +39,11 @@ export function NovaVendaModal({ produtos }: Props) {
 
   const handleClose = useCallback(() => {
     formRef.current?.reset()
-    setQuantidade(1)
-    setPrecoUnit(0)
+    setQuantidade(venda?.quantidade ?? 1)
+    setPrecoUnit(venda ? venda.valor_total / venda.quantidade : 0)
     setError(undefined)
     setOpen(false)
-  }, [])
+  }, [venda])
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault()
@@ -40,32 +51,57 @@ export function NovaVendaModal({ produtos }: Props) {
     setError(undefined)
     const fd = new FormData(e.currentTarget)
     fd.set('valor_total', valorTotal.toFixed(2))
-    const result = await createVenda(fd)
+
+    const result = isEditing
+      ? await updateVenda(venda.id, fd)
+      : await createVenda(fd)
+
     setLoading(false)
-    if (result.error) {
-      setError(result.error)
-      return
-    }
+    if (result.error) { setError(result.error); return }
     handleClose()
   }
 
   return (
     <>
-      <button onClick={() => setOpen(true)} className="btn-primary">
-        <Plus size={16} aria-hidden="true" />
-        Nova Venda
-      </button>
+      {isEditing ? (
+        <button
+          onClick={() => setOpen(true)}
+          title="Editar venda"
+          className="p-1.5 rounded-md text-chocolate-400 hover:text-chocolate-700 hover:bg-chocolate-100 transition-colors"
+        >
+          <Pencil size={15} />
+        </button>
+      ) : (
+        <button onClick={() => setOpen(true)} className="btn-primary">
+          <Plus size={16} aria-hidden="true" />
+          Nova Venda
+        </button>
+      )}
 
-      <Modal open={open} onClose={handleClose} title="Nova Venda">
-        <form ref={formRef} onSubmit={handleSubmit} className="p-6 space-y-4">
+      <Modal open={open} onClose={handleClose} title={isEditing ? 'Editar Venda' : 'Nova Venda'}>
+        <form ref={formRef} onSubmit={handleSubmit} className="p-6 space-y-4 [&_.label]:text-left [&_.label]:block">
           <div>
             <label className="label" htmlFor="venda-data">Data da venda *</label>
-            <input id="venda-data" name="data" type="date" required defaultValue={todayISO()} className="input" />
+            <input
+              id="venda-data"
+              name="data"
+              type="date"
+              required
+              defaultValue={venda?.data ?? todayISO()}
+              className="input"
+            />
           </div>
 
           <div>
             <label className="label" htmlFor="venda-cliente">Cliente *</label>
-            <input id="venda-cliente" name="descricao" required placeholder="Nome do cliente" className="input" />
+            <input
+              id="venda-cliente"
+              name="descricao"
+              required
+              placeholder="Nome do cliente"
+              defaultValue={venda?.cliente ?? venda?.descricao ?? ''}
+              className="input"
+            />
           </div>
 
           <div>
@@ -77,7 +113,14 @@ export function NovaVendaModal({ produtos }: Props) {
                 antes de registrar uma venda.
               </p>
             ) : (
-              <select id="venda-produto" name="produto_id" required onChange={handleProdutoChange} className="input">
+              <select
+                id="venda-produto"
+                name="produto_id"
+                required
+                defaultValue={venda?.produto_id ?? ''}
+                onChange={handleProdutoChange}
+                className="input"
+              >
                 <option value="">— Selecione um produto —</option>
                 {produtos.map((p) => (
                   <option key={p.id} value={p.id}>{p.nome}</option>
@@ -104,7 +147,7 @@ export function NovaVendaModal({ produtos }: Props) {
                 name="quantidade"
                 type="number"
                 min="1"
-                defaultValue="1"
+                value={quantidade}
                 required
                 onChange={(e) => setQuantidade(Math.max(1, Number(e.target.value) || 1))}
                 className="input"
@@ -123,12 +166,25 @@ export function NovaVendaModal({ produtos }: Props) {
 
           <div>
             <label className="label" htmlFor="venda-entrega">Data de entrega</label>
-            <input id="venda-entrega" name="data_entrega" type="date" className="input" />
+            <input
+              id="venda-entrega"
+              name="data_entrega"
+              type="date"
+              defaultValue={venda?.data_entrega ?? ''}
+              className="input"
+            />
           </div>
 
           <div>
             <label className="label" htmlFor="venda-obs">Observações</label>
-            <textarea id="venda-obs" name="observacoes" rows={3} placeholder="Opcional…" className="input resize-none" />
+            <textarea
+              id="venda-obs"
+              name="observacoes"
+              rows={3}
+              placeholder="Opcional…"
+              defaultValue={venda?.observacoes ?? ''}
+              className="input resize-none"
+            />
           </div>
 
           {error && (
@@ -144,7 +200,7 @@ export function NovaVendaModal({ produtos }: Props) {
               disabled={loading || produtos.length === 0}
               className="btn-primary flex-1 justify-center"
             >
-              {loading ? 'Salvando…' : 'Registrar Venda'}
+              {loading ? 'Salvando…' : isEditing ? 'Salvar alterações' : 'Registrar Venda'}
             </button>
           </div>
         </form>

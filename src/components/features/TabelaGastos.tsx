@@ -4,11 +4,15 @@ import { useCallback } from 'react'
 import { deleteGasto } from '@/actions/gastos'
 import { DeleteButton } from '@/components/ui/DeleteButton'
 import { formatCurrency, formatDate, TIPO_LABELS } from '@/lib/utils'
-import type { Gasto } from '@/types'
+import { NovoGastoModal } from '@/components/features/NovoGastoModal'
+import type { CategoriaGasto, Gasto } from '@/types'
 
-interface Props { gastos: Gasto[] }
+interface Props {
+  gastos: Gasto[]
+  categorias: CategoriaGasto[]   // ← NOVO
+}
 
-export function TabelaGastos({ gastos }: Props) {
+export function TabelaGastos({ gastos, categorias }: Props) {
   return (
     <>
       {/* Mobile: cards */}
@@ -63,7 +67,7 @@ function TipoBadge({ tipo }: { tipo: Gasto['tipo'] }) {
   )
 }
 
-function GastoCard({ gasto: g }: { gasto: Gasto }) {
+function GastoCard({ gasto, categorias }: { gasto: Gasto; categorias: CategoriaGasto[] }) {
   const handleDelete = useCallback(() => deleteGasto(g.id), [g.id])
   return (
     <div className="p-4 space-y-2">
@@ -78,13 +82,18 @@ function GastoCard({ gasto: g }: { gasto: Gasto }) {
       </div>
       {g.observacoes && <p className="text-xs text-chocolate-400 italic">{g.observacoes}</p>}
       <div className="pt-1">
-        <DeleteButton onDelete={handleDelete} />
+        <div className="flex items-center justify-between pt-1">
+        <div className="flex items-center gap-1">
+          <NovoGastoModal categorias={categorias} gasto={g} />
+          <DeleteButton onDelete={handleDelete} />
+        </div>
+      </div>
       </div>
     </div>
   )
 }
 
-function GastoRow({ gasto: g }: { gasto: Gasto }) {
+function GastoRow({ gasto, categorias }: { gasto: Gasto; categorias: CategoriaGasto[] }) {
   const handleDelete = useCallback(() => deleteGasto(g.id), [g.id])
   return (
     <tr className="hover:bg-chocolate-50/50 transition-colors">
@@ -100,7 +109,12 @@ function GastoRow({ gasto: g }: { gasto: Gasto }) {
       </td>
       <td className="px-5 py-3"><TipoBadge tipo={g.tipo} /></td>
       <td className="px-5 py-3 text-right font-semibold text-red-500">{formatCurrency(g.valor)}</td>
-      <td className="px-5 py-3 text-right"><DeleteButton onDelete={handleDelete} /></td>
+      <td className="px-5 py-3 text-right">
+      <div className="flex items-center justify-end gap-1">
+        <NovoGastoModal categorias={categorias} gasto={g} />
+        <DeleteButton onDelete={handleDelete} />
+      </div>
+    </td>
     </tr>
   )
 }

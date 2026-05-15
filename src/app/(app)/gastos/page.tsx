@@ -52,7 +52,7 @@ export default async function GastosPage({ searchParams }: Props) {
             description="Clique em 'Novo Gasto' para registrar seu primeiro gasto deste período."
           />
         ) : (
-          <TabelaGastos gastos={gastos} />
+          <TabelaGastos gastos={gastos} categorias={categorias} />
         )}
       </div>
     </div>
