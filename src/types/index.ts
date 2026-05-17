@@ -1,6 +1,7 @@
 export type Canal = 'loja' | 'delivery' | 'encomenda' | 'outro'
 export type TipoGasto = 'fixo' | 'variavel'
 export type StatusVenda = 'pendente' | 'pago'
+export type DescontoTipo = 'percentual' | 'valor'
 
 export interface Produto {
   id: string
@@ -32,6 +33,8 @@ export interface Venda {
   observacoes: string | null
   created_at: string
   produto?: Produto
+  desconto_tipo: DescontoTipo
+  desconto_valor: number
 }
 
 export interface Gasto {

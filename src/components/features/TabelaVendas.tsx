@@ -22,7 +22,7 @@ function StatusBadge({ status }: { status: Venda['status'] }) {
   }
   return (
     <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-amber-100 text-amber-700">
-      ⏳ Pendente
+      Não pago
     </span>
   )
 }
@@ -55,7 +55,7 @@ function ToggleStatusButton({ venda }: { venda: Venda }) {
       title="Marcar como pago"
       className="text-xs font-medium text-green-600 hover:text-green-800 disabled:opacity-50 transition-colors whitespace-nowrap"
     >
-      {pending ? '…' : '✓ Marcar pago'}
+      {pending ? '…' : '✓ Marcar como pago'}
     </button>
   )
 }
